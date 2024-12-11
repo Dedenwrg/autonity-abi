@@ -1,0 +1,65 @@
+name: Build and Upload ABI
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    # Step 1: Checkout the code
+    - name: Checkout repository
+      uses: actions/checkout@v3
+    
+    # Step 2: Clone the Autonity repository
+    - name: Clone Autonity Repository
+      run: git clone https://github.com/autonity/autonity.git
+    
+    # Step 3: Checkout the specific tag
+    - name: Checkout Tag v1.0.2-alpha
+      run: |
+        cd autonity
+        git checkout tags/v1.0.2-alpha -b v1.0.2-alpha
+    
+    # Step 4: Set up Go 1.22.10
+    - name: Set up Go 1.22.10
+      uses: actions/setup-go@v3
+      with:
+        go-version: '1.22.10'  # Menggunakan versi Go v1.22.10
+    
+    # Step 5: Install Dependencies
+    - name: Install Dependencies
+      run: sudo apt-get update && sudo apt-get install -y make jq
+    
+    # Step 6: Install Go modules and tidy up
+    - name: Go mod tidy
+      run: |
+        cd autonity
+        go mod tidy
+    
+    # Step 7: Build contracts
+    - name: Build contracts
+      run: |
+        cd autonity
+        make contracts
+    
+    # Step 8: Create ABI folder and copy ABI files
+    - name: Create ABI folder
+      run: |
+        mkdir -p ./abi
+        cp autonity/params/generated/*.abi ./abi/
+    
+    # Step 9: Pull latest changes before commit
+    - name: Pull latest changes
+      run: |
+        git pull origin main || echo "No changes to pull"
+
+    # Step 10: Commit and Push ABI files
+    - name: Commit and Push ABI files
+      uses: stefanzweifel/git-auto-commit-action@v4
+      with:
+        commit_message: "Upload ABI files"
+        file_pattern: "./abi/*.abi"

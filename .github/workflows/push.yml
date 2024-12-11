@@ -1,4 +1,4 @@
-name: Build and Upload ABI
+name: Build and Upload Autonity ABI
 
 on:
   push:

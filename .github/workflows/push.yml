@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    # Step 1: Checkout the code
+    # Step 1: Checkout repository
     - name: Checkout repository
       uses: actions/checkout@v3
     
@@ -20,9 +20,8 @@ jobs:
     
     # Step 3: Checkout the specific tag
     - name: Checkout Tag v1.0.2-alpha
-      run: |
-        cd autonity
-        git checkout tags/v1.0.2-alpha -b v1.0.2-alpha
+      working-directory: autonity
+      run: git checkout tags/v1.0.2-alpha -b v1.0.2-alpha
     
     # Step 4: Set up Go 1.22.10
     - name: Set up Go 1.22.10
@@ -36,31 +35,39 @@ jobs:
     
     # Step 6: Install Go modules and tidy up
     - name: Go mod tidy
-      run: |
-        cd autonity
-        go mod tidy
+      working-directory: autonity
+      run: go mod tidy
     
     # Step 7: Build contracts
     - name: Build contracts
-      run: |
-        cd autonity
-        make contracts
+      working-directory: autonity
+      run: make contracts
     
-    # Step 8: Clear ABI folder and copy only selected ABI files
-    - name: Prepare ABI folder
+    # Step 8: Clear ABI & doc folders and copy only selected files
+    - name: Prepare ABI and doc folders
       run: |
-        rm -rf ./abi  
-        mkdir -p ./abi
-        cp autonity/params/generated/{Autonity,ACU,Accountability,Inflation_controller,Liquid_logic,Oracle,Stabilization,Supply_control,Upgrade_manager,Omission_accountability}.abi ./abi/ || echo "No matching files found"
+        rm -rf ./abi ./doc
+        mkdir -p ./abi ./doc
+        cp autonity/params/generated/{Autonity,ACU,Accountability,InflationController,LiquidLogic,Oracle,Stabilization,SupplyControl,UpgradeManager,OmissionAccountability}.abi ./abi/ || echo "No ABI files found"
+        cp autonity/params/generated/*.docuser autonity/params/generated/*.docdev ./doc/ || echo "No doc files found"
+        ls -lah ./abi
+        ls -lah ./doc
     
     # Step 9: Pull latest changes before commit
     - name: Pull latest changes
-      run: |
-        git pull origin main || echo "No changes to pull"
+      run: git pull origin main || echo "No changes to pull"
 
     # Step 10: Commit and Push ABI files
     - name: Commit and Push ABI files
       uses: stefanzweifel/git-auto-commit-action@v4
       with:
         commit_message: "update ABI"
-        file_pattern: "./abi/*.abi"
+        file_pattern: "./abi/*.abi ./doc/*"
+
+    # Step 11: Clean up cache
+    - name: Clean up cache
+      run: |
+        rm -rf autonity
+        rm -rf ./abi
+        rm -rf ./doc
+        echo "Cache cleaned up successfully!"

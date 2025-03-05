@@ -28,7 +28,7 @@ jobs:
     - name: Set up Go 1.22.10
       uses: actions/setup-go@v3
       with:
-        go-version: '1.22.10'  # Menggunakan versi Go v1.22.10
+        go-version: '1.22.10'
     
     # Step 5: Install Dependencies
     - name: Install Dependencies
@@ -46,11 +46,12 @@ jobs:
         cd autonity
         make contracts
     
-    # Step 8: Create ABI folder and copy ABI files
-    - name: Create ABI folder
+    # Step 8: Clear ABI folder and copy only selected ABI files
+    - name: Prepare ABI folder
       run: |
+        rm -rf ./abi  
         mkdir -p ./abi
-        cp autonity/params/generated/*.abi ./abi/
+        cp autonity/params/generated/{autonity,acu,accountabilityacu,inflation_controller,liquid_logic,oracle,stabilization,supply_control,upgrade_manager,omission_accountability}.abi ./abi/ || echo "No matching files found"
     
     # Step 9: Pull latest changes before commit
     - name: Pull latest changes
@@ -61,5 +62,5 @@ jobs:
     - name: Commit and Push ABI files
       uses: stefanzweifel/git-auto-commit-action@v4
       with:
-        commit_message: "Upload ABI files"
+        commit_message: "update ABI"
         file_pattern: "./abi/*.abi"

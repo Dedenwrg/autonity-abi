@@ -1,0 +1,1 @@
+{"kind":"user","methods":{"finalize(bool)":{"notice":"called by the Autonity Contract at block finalization."}},"version":1}

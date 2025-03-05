@@ -1,0 +1,1 @@
+{"kind":"dev","methods":{"getNewContract()":{"returns":{"_0":"`bytecode` the new contract bytecode.","_1":"`contractAbi` the new contract ABI."}}},"title":"Implementation of the Autonity contract-upgrade functionality. ","version":1}

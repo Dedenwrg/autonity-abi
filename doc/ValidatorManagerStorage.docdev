@@ -1,0 +1,1 @@
+{"kind":"dev","methods":{},"stateVariables":{"linkedValidators":{"details":"Stores the array of validators linked to the contract. "},"validatorIndex":{"details":"`validatorIndex[validator]` stores the `index+1` of validator in `linkedValidators` array."}},"version":1}

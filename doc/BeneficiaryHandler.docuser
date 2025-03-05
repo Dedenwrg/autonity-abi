@@ -1,0 +1,1 @@
+{"kind":"user","methods":{"getUniqueContractID(address,uint256)":{"notice":"Returns a unique id for each contract."},"totalContracts(address)":{"notice":"Returns the number of contracts entitled to some beneficiary."}},"version":1}

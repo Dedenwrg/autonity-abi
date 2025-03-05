@@ -1,0 +1,1 @@
+{"kind":"user","methods":{"calculateSupplyDelta(uint256,uint256,uint256,uint256)":{"notice":"Main function. Calculate NTN current supply delta."}},"version":1}

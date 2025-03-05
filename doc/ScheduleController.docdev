@@ -1,0 +1,1 @@
+{"kind":"dev","methods":{"getSchedule(address,uint256)":{"params":{"_id":"index of the schedule","_vault":"address of the vault for the schedule"}},"getTotalSchedules(address)":{"params":{"_vault":"address of the vault for the schedules"}}},"version":1}

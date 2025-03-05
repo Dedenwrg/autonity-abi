@@ -1,0 +1,1 @@
+{"kind":"dev","methods":{"finalize(bool)":{"params":{"_epochEnded":", true if this is the last block of the epoch"},"returns":{"_0":"the current delta value"}}},"version":1}

@@ -1,0 +1,1 @@
+{"kind":"user","methods":{"distributeRewards(address,uint256)":{"notice":"distribute slashing rewards to reporters."},"finalize(bool)":{"notice":"called by the Autonity Contract at block finalization, before processing reward redistribution."},"setCommittee(address[])":{"notice":"called by the Autonity Contract when the committee is updated."}},"version":1}

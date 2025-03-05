@@ -1,0 +1,1 @@
+{"kind":"user","methods":{"getSchedule(address,uint256)":{"notice":"Returns the schedule at index = `_id` in the `vaultSchedules[_vault]` array."},"getTotalSchedules(address)":{"notice":"Returns total number of schedules for the vault at address `_vault`."}},"version":1}

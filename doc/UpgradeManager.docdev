@@ -1,0 +1,1 @@
+{"kind":"dev","methods":{"upgrade(address,string)":{"details":"Call the in-protocol EVM replace mechanism. Requires specific tool to interact. Restricted to the operator account.","params":{"_data":"is the contract creation code.","_target":"is the target contract address to be updated."}}},"version":1}

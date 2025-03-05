@@ -51,7 +51,7 @@ jobs:
       run: |
         rm -rf ./abi  
         mkdir -p ./abi
-        cp autonity/params/generated/{autonity,acu,accountabilityacu,inflation_controller,liquid_logic,oracle,stabilization,supply_control,upgrade_manager,omission_accountability}.abi ./abi/ || echo "No matching files found"
+        cp autonity/params/generated/{Autonity,ACU,Accountability,Inflation_controller,Liquid_logic,Oracle,Stabilization,Supply_control,Upgrade_manager,Omission_accountability}.abi ./abi/ || echo "No matching files found"
     
     # Step 9: Pull latest changes before commit
     - name: Pull latest changes

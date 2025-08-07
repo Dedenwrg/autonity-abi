@@ -23,7 +23,7 @@ jobs:
 
       - name: Checkout Tag v1.1.2
         working-directory: ./autonity
-        run: git checkout tags/v1.1.2 -b vv1.1.2
+        run: git checkout tags/v1.1.2 -b v1.1.2
 
       - name: Set up Go
         uses: actions/setup-go@v5
@@ -43,10 +43,7 @@ jobs:
 
       - name: Prepare ABI JSON files
         run: |
-          # Buat direktori baru untuk menampung file JSON
           mkdir -p ./abi-json
-
-          # Salin file .abi dari hasil build dan ubah ekstensinya menjadi .json
           echo "Copying and renaming ABI files to JSON..."
           for file in ./autonity/params/generated/*.abi; do
             if [ -f "$file" ]; then
@@ -54,38 +51,43 @@ jobs:
               cp "$file" "./abi-json/${base_name}.json"
             fi
           done
-          
           echo "Generated JSON files:"
           ls -lah ./abi-json
 
-      - name: Upload artifact for deployment
-        uses: actions/upload-pages-artifact@v3
+      - name: Upload ABI files for deployment job
+        uses: actions/upload-artifact@v4
         with:
-          # Upload direktori abi-json
+          name: abi-files
           path: ./abi-json
 
   deploy:
-    # Job ini bergantung pada keberhasilan job 'build'
     needs: build
     runs-on: ubuntu-latest
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      # Step 1: Checkout repository (diperlukan oleh action directory-listing)
-      - name: Checkout
-        uses: actions/checkout@v4
+      - name: Download ABI files
+        uses: actions/download-artifact@v4
+        with:
+          name: abi-files
+
+      - name: Display structure
+        run: ls -R
 
       - name: Generate Directory Listings
         uses: jayanta525/github-pages-directory-listing@main
         with:
           FOLDER: .
 
-      - name: Upload Pages Artifact
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact for GitHub Pages
         uses: actions/upload-pages-artifact@v3
         with:
           path: .
-          
+
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4

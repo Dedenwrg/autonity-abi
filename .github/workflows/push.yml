@@ -18,41 +18,16 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Clone Autonity Repository
-        run: git clone https://github.com/autonity/autonity.git
-
-      - name: Checkout Tag v1.1.2
-        working-directory: ./autonity
-        run: git checkout tags/v1.1.2 -b v1.1.2
-
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
           go-version: '1.23'
-
-      - name: Install Dependencies
+      
+      - name: Install Make
         run: sudo apt-get update && sudo apt-get install -y make
 
-      - name: Go mod tidy
-        working-directory: ./autonity
-        run: go mod tidy
-
-      - name: Build contracts
-        working-directory: ./autonity
-        run: make contracts
-
-      - name: Prepare ABI JSON files
-        run: |
-          mkdir -p ./abi-json
-          echo "Copying and renaming ABI files to JSON..."
-          for file in ./autonity/params/generated/*.abi; do
-            if [ -f "$file" ]; then
-              base_name=$(basename "$file" .abi)
-              cp "$file" "./abi-json/${base_name}.json"
-            fi
-          done
-          echo "Generated JSON files:"
-          ls -lah ./abi-json
+      - name: Build and Prepare ABI files
+        run: make
 
       - name: Upload ABI files for deployment job
         uses: actions/upload-artifact@v4
@@ -71,9 +46,6 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: abi-files
-
-      - name: Display structure
-        run: ls -R
 
       - name: Generate Directory Listings
         uses: jayanta525/github-pages-directory-listing@main

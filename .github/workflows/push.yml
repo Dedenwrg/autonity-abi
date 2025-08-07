@@ -1,73 +1,91 @@
-name: Build and Upload Autonity ABI
+name: Build Autonity ABIs and Deploy to GitHub Pages
 
 on:
   push:
     branches:
       - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
-    # Step 1: Checkout repository
-    - name: Checkout repository
-      uses: actions/checkout@v3
-    
-    # Step 2: Clone the Autonity repository
-    - name: Clone Autonity Repository
-      run: git clone https://github.com/autonity/autonity.git
-    
-    # Step 3: Checkout the specific tag
-    - name: Checkout Tag v1.0.2-alpha
-      working-directory: autonity
-      run: git checkout tags/v1.0.2-alpha -b v1.0.2-alpha
-    
-    # Step 4: Set up Go 1.22.10
-    - name: Set up Go 1.22.10
-      uses: actions/setup-go@v3
-      with:
-        go-version: '1.22.10'
-    
-    # Step 5: Install Dependencies
-    - name: Install Dependencies
-      run: sudo apt-get update && sudo apt-get install -y make jq
-    
-    # Step 6: Install Go modules and tidy up
-    - name: Go mod tidy
-      working-directory: autonity
-      run: go mod tidy
-    
-    # Step 7: Build contracts
-    - name: Build contracts
-      working-directory: autonity
-      run: make contracts
-    
-    # Step 8: Clear ABI & doc folders and copy only selected files
-    - name: Prepare ABI and doc folders
-      run: |
-        rm -rf ./abi ./doc
-        mkdir -p ./abi ./doc
-        cp autonity/params/generated/{Autonity,ACU,Accountability,InflationController,LiquidLogic,Oracle,Stabilization,SupplyControl,UpgradeManager,OmissionAccountability}.abi ./abi/ || echo "No ABI files found"
-        cp autonity/params/generated/*.docuser autonity/params/generated/*.docdev ./doc/ || echo "No doc files found"
-        ls -lah ./abi
-        ls -lah ./doc
-    
-    # Step 9: Pull latest changes before commit
-    - name: Pull latest changes
-      run: git pull origin main || echo "No changes to pull"
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    # Step 10: Commit and Push ABI files
-    - name: Commit and Push ABI files
-      uses: stefanzweifel/git-auto-commit-action@v4
-      with:
-        commit_message: "update ABI"
-        file_pattern: "./abi/*.abi ./doc/*"
+      - name: Clone Autonity Repository
+        run: git clone https://github.com/autonity/autonity.git
 
-    # Step 11: Clean up cache
-    - name: Clean up cache
-      run: |
-        rm -rf autonity
-        rm -rf ./abi
-        rm -rf ./doc
-        echo "Cache cleaned up successfully!"
+      - name: Checkout Tag v1.1.2
+        working-directory: ./autonity
+        run: git checkout tags/v1.1.2 -b vv1.1.2
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+
+      - name: Install Dependencies
+        run: sudo apt-get update && sudo apt-get install -y make
+
+      - name: Go mod tidy
+        working-directory: ./autonity
+        run: go mod tidy
+
+      - name: Build contracts
+        working-directory: ./autonity
+        run: make contracts
+
+      - name: Prepare ABI JSON files
+        run: |
+          # Buat direktori baru untuk menampung file JSON
+          mkdir -p ./abi-json
+
+          # Salin file .abi dari hasil build dan ubah ekstensinya menjadi .json
+          echo "Copying and renaming ABI files to JSON..."
+          for file in ./autonity/params/generated/*.abi; do
+            if [ -f "$file" ]; then
+              base_name=$(basename "$file" .abi)
+              cp "$file" "./abi-json/${base_name}.json"
+            fi
+          done
+          
+          echo "Generated JSON files:"
+          ls -lah ./abi-json
+
+      - name: Upload artifact for deployment
+        uses: actions/upload-pages-artifact@v3
+        with:
+          # Upload direktori abi-json
+          path: ./abi-json
+
+  deploy:
+    # Job ini bergantung pada keberhasilan job 'build'
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      # Step 1: Checkout repository (diperlukan oleh action directory-listing)
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Generate Directory Listings
+        uses: jayanta525/github-pages-directory-listing@main
+        with:
+          FOLDER: .
+
+      - name: Upload Pages Artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+          
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
